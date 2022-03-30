@@ -1,43 +1,76 @@
 const express = require("express");
 const router = express.Router();
-// const chirpsStore = require("../chirpstore.js");
-// no more chirpstore! install mysql from npm and configure the routes to use that instead of chirpstore.
+import db from '../db/index.js'
 
 // REST API
-router.get("/:id?", (req, res) => {
-    const id = req.params.id;
+router.get('/:id?', async(req, res)=>{
+    
+    const id=req.params.id;
+    try{
+        if(id){
 
-    if (id) {
-        // const chirp = chirpsStore.GetChirp(id);
-        res.json(chirp);
-    } else {
-        const chirps = chirpsStore.GetChirps();
-        res.json(chirps);
+            res.json(await db.one(id))
+          
+        }else{
+
+            res.json(await db.all());
+          
+        }
+
+    }catch(e){
+        console.log(e);
+        res.sendStatus(500);
+
+    }
+
+});
+
+
+// Create
+router.post("/", async(req, res) => {
+    const userid = req.body.userid;
+    const content= req.body.content;
+    const location=req.body.location;
+
+    try{
+        await db.post(userid, content, location);
+        res.sendStatus(200);
+
+    }catch(e){
+        console.log(e);
+        res.sendStatus(500);
     }
 });
 
-// Create
-router.post("/", (req, res) => {
-    const body = req.body;
-
-    // chirpsStore.CreateChirp(body);
-    res.sendStatus(200);
-});
-
 // Delete
-router.delete("/:id", (req, res) => {
+router.delete("/:id", async(req, res) => {
     const id = req.params.id;
-    // chirpsStore.DeleteChirp(id);
-    res.sendStatus(200);
+
+    try{
+        await db.remove(id);
+        res.sendStatus(200);
+
+    }catch(e){
+        console.log(e)
+        res.sendStatus(500);
+    }
+  
 });
 
 // Update
-router.put("/:id", (req, res) => {
+router.put("/:id", async(req, res) => {
     const id = req.params.id;
-    const body = req.body;
+    const content= req.body.content;
+    const location=req.body.location;
 
-    // chirpsStore.UpdateChirp(id, body);
-    res.sendStatus(200);
+    try{
+        await db.update(id, content, location);
+        res.sendStatus(200)
+
+    }catch(err){
+        console.log(err);
+        res.sendStatus(500);
+    }
 });
 
-module.exports = router;
+export default router;
