@@ -8,12 +8,16 @@ router.get('/:id?', async(req, res)=>{
     const id=req.params.id;
     try{
         if(id){
+            const chirp= await db.one(id)
 
-            res.json(await db.one(id))
+            res.json(chirp);
+            res.sendStatus(200);
           
         }else{
 
-            res.json(await db.all());
+            const chirps = await db.all()
+            res.json(chirps);
+            res.sendStatus(200);
           
         }
 
@@ -33,7 +37,8 @@ router.post("/", async(req, res) => {
     const location=req.body.location;
 
     try{
-        await db.post(userid, content, location);
+        const newChirp= await db.post(userid, content, location);
+        res.send(newChirp);
         res.sendStatus(200);
 
     }catch(e){
@@ -47,7 +52,8 @@ router.delete("/:id", async(req, res) => {
     const id = req.params.id;
 
     try{
-        await db.remove(id);
+        const removeChirip = await db.remove(id);
+        res.send(removeChirip)
         res.sendStatus(200);
 
     }catch(e){
@@ -61,10 +67,11 @@ router.delete("/:id", async(req, res) => {
 router.put("/:id", async(req, res) => {
     const id = req.params.id;
     const content= req.body.content;
-    const location=req.body.location;
+     
 
     try{
-        await db.update(id, content, location);
+        const updatedChirp= await db.update(id, content);
+        res.json(updatedChirp);
         res.sendStatus(200)
 
     }catch(err){
