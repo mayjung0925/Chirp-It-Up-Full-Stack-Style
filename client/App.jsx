@@ -1,46 +1,94 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 import ChirpCard from "./components/ChirpCard.jsx";
 
 const App = () => {
-  const [username, setUsername] = useState("");
-  const [message, setMessage] = useState("");
+  const [name, setName] = useState("");
+  const [content, setContent] = useState("");
   const [chirps, setChirps] = useState([
     {
       id: uuidv4(),
-      username: "Josh",
-      message: "This is the chirp body!",
+      name: "Josh",
+      content: "This is the chirp body!",
       created: moment().format("dddd, MMMM Do YYYY, h:mm:ss a"),
     },
     {
       id: uuidv4(),
-      username: "Haylee",
-      message: "Hello!",
+      name: "Haylee",
+      content: "Hello!",
       created: moment().format("dddd, MMMM Do YYYY, h:mm:ss a"),
     },
     {
       id: uuidv4(),
-      username: "Garrett",
-      message: "I'm not mad!",
+      name: "Garrett",
+      content: "I'm not mad!",
       created: moment().format("dddd, MMMM Do YYYY, h:mm:ss a"),
     },
   ]);
 
-  const handleUsernameChange = (e) => setUsername(e.target.value);
-  const handleMessageChange = (e) => setMessage(e.target.value);
+  const handleNameChange = (e) => setName(e.target.value);
+  const handleContentChange = (e) => setContent(e.target.value);
+  //Send a Post request 
   const handleChirpSubmit = (e) => {
     e.preventDefault();
-
-    const newChirp = {
-      id: uuidv4(),
-      username: username,
-      message: message,
-      created: moment().format("dddd, MMMM Do YYYY, h:mm:ss a"),
+    
+    const newChirp ={
+      userid:1,
+      content:content,
+      location: ''
     };
 
-    setChirps([...chirps, newChirp]);
+    const options ={
+      method : 'POST',
+      headers:{'Content-Type' : 'application/json'},
+      body : JSON.stringify(newChirp),
+    };
+
+    fetch('http://localhost:3000/api/chirps', options)
+    .then(()=> console.log('success'))
+    .then(()=>location.reload())
+    .catch((err)=>console.log(err));
+
   };
+//Send a Delete request
+  const handleDelete = (id)=>{
+    console.log('delete button clicked');
+   
+    fetch('http://localhost:3000/api/chirps/'+id, { method: 'DELETE' })
+    .then(() => console.log('deleted'))
+    .then(()=>location.reload())
+    .catch((e)=>console.log(e));
+
+}
+//Send a Get request to retrieve a specific chirp
+const handleDetails= (id)=>{
+
+  console.log('details button clicked');
+
+  fetch('http://localhost:3000/api/chirps/'+id)
+  .then((response)=>response.json())
+  .then((chirp)=>
+    console.log(chirp))
+  .catch((e)=>console.log(e));
+  
+}
+
+
+
+//Send a Get request 
+ useEffect(()=>{
+   fetch('http://localhost:3000/api/chirps')
+   .then(response=>  response.json())
+   .then((allChirps)=>{
+    console.log(allChirps);
+    setChirps(allChirps);
+
+     })
+   
+ },[]);
+ 
+  
 
   return (
     <>
@@ -63,17 +111,17 @@ const App = () => {
               <input
                 type="text"
                 className="form-control mb-1"
-                placeholder="Username"
-                aria-label="Username"
-                value={username}
-                onChange={handleUsernameChange}
+                placeholder="name"
+                aria-label="name"
+                value={name}
+                onChange={handleNameChange}
               />
               <textarea
                 className="form-control mb-2"
                               aria-label="With textarea"
                               placeholder="(500 characters max)"
-                value={message}
-                onChange={handleMessageChange}
+                value={content}
+                onChange={handleContentChange}
                 cols="30"
                 rows="10"
               ></textarea>
@@ -84,12 +132,18 @@ const App = () => {
           </form>
           <div className=" chirps mb-4">
             {chirps.map((chirp) => (
+              
               <ChirpCard
                 key={chirp.id}
-                username={chirp.username}
-                message={chirp.message}
-                created={chirp.created}
+                name={chirp.name}
+                content={chirp.content}
+                created={chirp._created}
+                id={chirp.id}
+                deleteFunction={()=>{handleDelete(chirp.id)}}
+                detailsFunction={()=>{handleDetails(chirp.id)}}
               />
+              
+              
             ))}
           </div>
         </div>

@@ -32,6 +32,7 @@ router.get('/:id?', async(req, res)=>{
 
 // Create
 router.post("/", async(req, res) => {
+   
     const userid = req.body.userid;
     const content= req.body.content;
     const location=req.body.location;
@@ -53,7 +54,7 @@ router.delete("/:id", async(req, res) => {
 
     try{
         const removeChirip = await db.remove(id);
-        res.send(removeChirip)
+       
         res.sendStatus(200);
 
     }catch(e){
